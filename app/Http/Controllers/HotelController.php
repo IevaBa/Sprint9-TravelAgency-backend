@@ -14,7 +14,8 @@ class HotelController extends Controller
      */
     public function index()
     {
-        //
+        $hotel = Hotel::with('country')->orderBy('price')->get();
+        return $hotel;
     }
 
     /**
@@ -35,7 +36,25 @@ class HotelController extends Controller
      */
     public function store(Request $request)
     {
-        //
+         //VALIDATION
+        $this->validate($request, [
+            'title'=>'required|unique:hotels,title',
+            'price'=>'required',
+            'image'=>'required|image',
+            'days'=>'required',
+            'country_id'=>'required',
+        ]);
+        
+        $hotel= new Hotel;
+        $hotel->title=$request->input('title');
+        $hotel->price=$request->input('price');
+        $hotel->image=$request->file('image')->store('hotels');
+        $hotel->days=$request->input('days');
+        $hotel->country_id=$request->input('country_id');
+        
+        return ($hotel->save()==1)
+        ? response()->json(['message'=>'Hotel Created Successfully!!'])
+        : response()->json(['error'=>'Something went wrong while creating hotel!!'],500);
     }
 
     /**
@@ -78,8 +97,10 @@ class HotelController extends Controller
      * @param  \App\Models\Hotel  $hotel
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Hotel $hotel)
+    public function destroy($id)
     {
-        //
+        return (\App\Models\Hotel::destroy($id) == 1) 
+        ?  response()->json(['message'=>'Hotel Deleted Successfully!!'], 200) 
+        :  response()->json(['error' => 'Deleting was not successful'], 500);
     }
 }

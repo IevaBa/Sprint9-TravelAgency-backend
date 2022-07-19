@@ -14,7 +14,8 @@ class CountryController extends Controller
      */
     public function index()
     {
-        //
+        $country= Country::orderBy('title')->get();
+        return $country;
     }
 
     /**
@@ -35,7 +36,19 @@ class CountryController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        //VALIDATION 
+        $this->validate($request, [
+            'title'=>'required|unique:countries,title',
+            'season'=>'required',
+        ]);
+        
+        $country= new Country;
+        $country->title=$request->get('title');
+        $country->season=$request->get('season');
+
+        return ($country->save()==1)
+        ? response()->json(['message'=>'Country Created Successfully!!' ])
+        : response()->json(['error'=>'Something went wrong while adding new country!!'],500);
     }
 
     /**
@@ -78,8 +91,10 @@ class CountryController extends Controller
      * @param  \App\Models\Country  $country
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Country $country)
+    public function destroy($id)
     {
-        //
+        return (\App\Models\Country::destroy($id) == 1) 
+        ? response()->json(['message'=>'Country Deleted Successfully!!'], 200) 
+        : response()->json(['error' => 'Deleting was not successful'], 500);
     }
 }

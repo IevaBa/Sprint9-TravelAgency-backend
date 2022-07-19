@@ -14,7 +14,8 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        //
+        $customer = Customer::with('hotel')->orderBy('surname')->get();
+        return $customer;
     }
 
     /**
@@ -35,7 +36,21 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
-        //
+       //VALIDATION 
+        $this->validate($request, [
+        'name' => 'required', 
+        'surname' => 'required',
+        'email' => 'required',
+        'phone' => 'required',
+        'hotel_id' => 'required'
+        ]);
+        
+        $customer = new Customer();
+        $customer->fill($request->all());
+
+        return ($customer->save()==1)
+        ? response()->json(['message'=>'Customer Created Successfully!!' ])
+        : response()->json(['error'=>'Something went wrong while adding new customer!!'],500);
     }
 
     /**
@@ -78,8 +93,10 @@ class CustomerController extends Controller
      * @param  \App\Models\Customer  $customer
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Customer $customer)
+    public function destroy($id)
     {
-        //
+        return (\App\Models\Customer::destroy($id) == 1) 
+        ? response()->json(['message' => 'Customer Successfully Deleted'], 200)
+        : response()->json(['error' => 'Deleting was not successful'], 500);
     }
 }
