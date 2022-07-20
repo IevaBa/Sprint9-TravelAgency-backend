@@ -57,9 +57,9 @@ class CountryController extends Controller
      * @param  \App\Models\Country  $country
      * @return \Illuminate\Http\Response
      */
-    public function show(Country $country)
+    public function show($id)
     {
-        //
+        return Country::find($id);
     }
 
     /**
@@ -68,9 +68,9 @@ class CountryController extends Controller
      * @param  \App\Models\Country  $country
      * @return \Illuminate\Http\Response
      */
-    public function edit(Country $country)
+    public function edit($id)
     {
-        //
+       //
     }
 
     /**
@@ -80,9 +80,19 @@ class CountryController extends Controller
      * @param  \App\Models\Country  $country
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Country $country)
+    public function update(Request $request, $id)
     {
-        //
+        $this->validate($request, [
+  
+        'title' => 'required|unique:countries,title, '.$id.',id',
+        'season' => 'required',]);
+
+        $country = Country::find($id);
+        $country->fill($request->all());
+
+        return ($country->save() !== 1)
+        ? response()->json(['message'=>'Country Edited Successfully!!' ])
+        : response()->json(['error'=>'Something went wrong while editing country!!'],500);
     }
 
     /**

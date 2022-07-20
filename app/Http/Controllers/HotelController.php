@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Hotel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class HotelController extends Controller
 {
@@ -63,9 +65,9 @@ class HotelController extends Controller
      * @param  \App\Models\Hotel  $hotel
      * @return \Illuminate\Http\Response
      */
-    public function show(Hotel $hotel)
+    public function show($id)
     {
-        //
+        return Hotel::find($id);
     }
 
     /**
@@ -74,7 +76,7 @@ class HotelController extends Controller
      * @param  \App\Models\Hotel  $hotel
      * @return \Illuminate\Http\Response
      */
-    public function edit(Hotel $hotel)
+    public function edit($id)
     {
         //
     }
@@ -86,9 +88,47 @@ class HotelController extends Controller
      * @param  \App\Models\Hotel  $hotel
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Hotel $hotel)
+    public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'title' => 'required|unique:countries,title, '.$id.',id',
+            'price'=>'required',
+            'days'=>'required',
+            'image'=>'nullable',
+            'country_id'=>'required',
+        ]);
+
+        try{
+            $hotel = Hotel::find($id);
+            $hotel->fill($request->post())->update();
+
+            if($request->hasFile('image')){
+
+                // remove old image
+                $img = 'hotels/';
+                if($hotel->image){
+                    $exists = Storage::disk('local')->exists("hotels/{$hotel->image}");
+                    if($exists){
+                        Storage::disk('local')->delete("hotels/{$hotel->image}");
+                    }
+                }
+
+                $imageName = Str::random().'.'.$request->image->getClientOriginalExtension();
+                Storage::disk('local')->putFileAs('hotels', $request->image,$imageName);
+                $hotel->image = $imageName;
+                $hotel->save();
+            }
+
+            return response()->json([
+                'message'=>'Hotel Updated Successfully!!'
+            ]);
+
+        }catch(\Exception $e){
+            \Log::error($e->getMessage());
+            return response()->json([
+                'message'=>'Something went wrong while updating a hotel!!'
+            ],500);
+        }
     }
 
     /**

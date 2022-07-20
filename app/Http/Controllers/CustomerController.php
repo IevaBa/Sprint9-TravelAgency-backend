@@ -59,9 +59,9 @@ class CustomerController extends Controller
      * @param  \App\Models\Customer  $customer
      * @return \Illuminate\Http\Response
      */
-    public function show(Customer $customer)
+    public function show($id)
     {
-        //
+        return Customer::find($id);
     }
 
     /**
@@ -82,9 +82,23 @@ class CustomerController extends Controller
      * @param  \App\Models\Customer  $customer
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Customer $customer)
+    public function update(Request $request, $id)
     {
-        //
+        //VALIDATION 
+        $this->validate($request, [
+        'name' => 'required', 
+        'surname' => 'required',
+        'email' => 'required',
+        'phone' => 'required',
+        'hotel_id' => 'required'
+        ]);
+        
+        $customer = Customer::find($id);
+        $customer->fill($request->all());
+
+        return ($customer->save() !== 1)
+        ? response()->json(['message'=>'Customer Edited Successfully!!' ])
+        : response()->json(['error'=>'Something went wrong while editing customer!!'],500);
     }
 
     /**
