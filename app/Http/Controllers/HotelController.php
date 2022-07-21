@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Hotel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -91,44 +92,34 @@ class HotelController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'title' => 'required|unique:countries,title, '.$id.',id',
+            'title' => 'required|unique:hotels,title, '.$id.',id',
             'price'=>'required',
             'days'=>'required',
             'image'=>'nullable',
             'country_id'=>'required',
         ]);
 
-        try{
-            $hotel = Hotel::find($id);
-            $hotel->fill($request->post())->update();
+        $hotel = Hotel::find($id);
+        $hotel->title=$request->input('title');
+        $hotel->price=$request->input('price');
+        $hotel->days=$request->input('days');
+        $hotel->country_id=$request->input('country_id');
 
-            if($request->hasFile('image')){
-
-                // remove old image
-                $img = 'hotels/';
-                if($hotel->image){
-                    $exists = Storage::disk('local')->exists("hotels/{$hotel->image}");
-                    if($exists){
-                        Storage::disk('local')->delete("hotels/{$hotel->image}");
-                    }
-                }
-
-                $imageName = Str::random().'.'.$request->image->getClientOriginalExtension();
-                Storage::disk('local')->putFileAs('hotels', $request->image,$imageName);
-                $hotel->image = $imageName;
-                $hotel->save();
-            }
-
-            return response()->json([
-                'message'=>'Hotel Updated Successfully!!'
-            ]);
-
-        }catch(\Exception $e){
-            \Log::error($e->getMessage());
-            return response()->json([
-                'message'=>'Something went wrong while updating a hotel!!'
-            ],500);
+        if($request->hasfile('image'))
+        {
+            $destination ='hotels/'.$hotel->image;
+                if(File::exists($destination))
+                {
+                    File::delete($destination);
+                }   
+            $hotel->image=$request->file('image')->store('hotels');
         }
+
+        //return $hotel->update();
+        return ($hotel->save() !== 1)
+        ? response()->json(['message'=>'Hotel Edited Successfully!!' ])
+        : response()->json(['error'=>'Something went wrong while editing hotel!!'],500);
+       
     }
 
     /**
