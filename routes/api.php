@@ -33,3 +33,5 @@ Route::controller(AuthController::class)->group(function () {
 Route::resource('/countries', CountryController::class);
 Route::resource('/hotels', HotelController::class);
 Route::resource('/customers', CustomerController::class);
+
+Route::get('search/{key}', [HotelController::class, 'searchHotel']);

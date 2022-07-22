@@ -138,4 +138,10 @@ class HotelController extends Controller
         ?  response()->json(['message'=>'Hotel Deleted Successfully!!'], 200) 
         :  response()->json(['error' => 'Deleting was not successful'], 500);
     }
+
+    function searchHotel($key){
+
+        //return $key;
+        return Hotel::with('country')->where('title', 'Like', "%$key%")->get();
+    }
 }
