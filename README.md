@@ -31,7 +31,7 @@ To run this project you will need XAMPP and MySQL Workbench. Install if you stil
 7. For next step you have to generate app key by running this command: `php artisan key:generate`;
 8. This app has implemented JWT auth, so you have to generate secret key for token encryption. to do that run this command line `php artisan jwt:secret`;
 9. Now run migrations and seeders by typing `php artisan migrate` and `php artisan db:seed`;
-10. Finally run `php artisan:serve`, your API is ready !!
+10. Finally run `php artisan serve`, your API is ready !!
 11. To run project in React follow the launch procedure here: https://github.com/IevaBa/Sprint9-TravelAgency-frontend .
 
 ## Author
